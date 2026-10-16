@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Club - Primary School</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-red: #ff4757;
+            --primary-blue: #1e90ff;
+            --primary-yellow: #ffa502;
+            --primary-green: #2ed573;
+            --primary-purple: #a55eea;
+            --bg-sky: #70a1ff;
+            --text-dark: #2f3542;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: linear-gradient(135deg, #70a1ff 0%, #eccc68 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Top Header & Settings Bar */
+        .top-bar {
+            width: 100%;
+            max-width: 1000px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 20px 10px 20px;
+            z-index: 10;
+        }
+
+        .brand-logo {
+            font-family: 'Fredoka One', cursive;
+            font-size: 2.5rem;
+            color: #ffffff;
+            text-shadow: 3px 3px 0px var(--primary-red), 6px 6px 0px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .settings-btn {
+            background: #ffffff;
+            border: 3px solid var(--primary-blue);
+            border-radius: 50px;
+            padding: 10px 20px;
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.1rem;
+            color: var(--primary-blue);
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .settings-btn:hover {
+            transform: scale(1.05);
+            background: #f1f2f6;
+        }
+
+        /* Settings Modal Panel */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .settings-card {
+            background: #ffffff;
+            border-radius: 25px;
+            padding: 30px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: 5px solid var(--primary-yellow);
+            text-align: center;
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .settings-card h2 {
+            font-family: 'Fredoka One', cursive;
+            color: var(--primary-blue);
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+        }
+
+        .setting-item {
+            margin: 20px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            text-align: left;
+        }
+
+        .setting-item label {
+            font-weight: 700;
+            color: var(--text-dark);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .slider {
+            width: 100%;
+            height: 12px;
+            border-radius: 6px;
+            background: #dfe4ea;
+            outline: none;
+            accent-color: var(--primary-red);
+            cursor: pointer;
+        }
+
+        .btn-toggle {
+            background: var(--primary-green);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 12px;
+            font-family: 'Fredoka One', cursive;
+            cursor: pointer;
+            width: 100%;
+            font-size: 1rem;
+            box-shadow: 0 4px 0 #20bf6b;
+        }
+
+        .btn-toggle:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #20bf6b;
+        }
+
+        .close-btn {
+            margin-top: 15px;
+            background: var(--primary-red);
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 15px;
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.1rem;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #eb4d4b;
+        }
+
+        /* Grade Selector Tabs */
+        .level-selector {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+            z-index: 5;
+        }
+
+        .level-btn {
+            background: white;
+            border: 4px solid var(--primary-blue);
+            padding: 12px 24px;
+            border-radius: 20px;
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.2rem;
+            color: var(--primary-blue);
+            cursor: pointer;
+            box-shadow: 0 6px 0 var(--primary-blue);
+            transition: all 0.1s ease;
+        }
+
+        .level-btn.active {
+            background: var(--primary-yellow);
+            border-color: #eccc68;
+            color: white;
+            box-shadow: 0 6px 0 #d4a311;
+            transform: translateY(-2px);
+        }
+
+        .level-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 var(--primary-blue);
+        }
+
+        /* Main Menu Grid */
+        .container {
+            width: 90%;
+            max-width: 900px;
+            margin-bottom: 40px;
+            z-index: 5;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 10px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 30px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            border: 5px solid white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-games { border-color: var(--primary-red); }
+        .card-worksheets { border-color: var(--primary-purple); }
+
+        .card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+
+        .card-icon {
+            font-size: 4.5rem;
+            margin-bottom: 15px;
+        }
+
+        .card-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .card-games .card-title { color: var(--primary-red); }
+        .card-worksheets .card-title { color: var(--primary-purple); }
+
+        .card-desc {
+            color: #747d8c;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        /* Decorative Background Icons */
+        .bg-decor {
+            position: absolute;
+            opacity: 0.15;
+            font-size: 6rem;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .decor-1 { top: 10%; left: 5%; }
+        .decor-2 { bottom: 15%; right: 5%; }
+        .decor-3 { top: 40%; right: 10%; }
+        .decor-4 { bottom: 20%; left: 8%; }
+    </style>
+</head>
+<body>
+
+    <div class="bg-decor decor-1">🇬🇧</div>
+    <div class="bg-decor decor-2">🚌</div>
+    <div class="bg-decor decor-3">🎡</div>
+    <div class="bg-decor decor-4">🗽</div>
+
+    <!-- Header & Settings Button -->
+    <header class="top-bar">
+        <div class="brand-logo">
+            <span>English Club</span> 🎈
+        </div>
+        <button class="settings-btn" id="openSettings">
+            ⚙️ Settings
+        </button>
+    </header>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="settings-card">
+            <h2>⚙️ Audio Settings</h2>
+            
+            <div class="setting-item">
+                <button class="btn-toggle" id="toggleAudioBtn">▶️ Play Active Music</button>
+            </div>
+
+            <div class="setting-item">
+                <label>Music Volume <span id="volVal">50%</span></label>
+                <input type="range" class="slider" id="volSlider" min="0" max="100" value="50">
+            </div>
+
+            <div class="setting-item">
+                <button class="btn-toggle" id="toggleSfxBtn" style="background: var(--primary-blue); box-shadow: 0 4px 0 #0984e3;">🔊 SFX Sounds: ON</button>
+            </div>
+
+            <button class="close-btn" id="closeSettings">Close</button>
+        </div>
+    </div>
+
+    <!-- Grade Selector -->
+    <div class="level-selector">
+        <button class="level-btn active" onclick="selectLevel(3, this)">3º Primaria</button>
+        <button class="level-btn" onclick="selectLevel(4, this)">4º Primaria</button>
+        <button class="level-btn" onclick="selectLevel(5, this)">5º Primaria</button>
+    </div>
+
+    <!-- Main Categories -->
+    <main class="container">
+        <div class="menu-grid">
+            <div class="card card-games" onclick="openSection('games')">
+                <div class="card-icon">🎮</div>
+                <div class="card-title">Games</div>
+                <div class="card-desc">Interactive challenges, vocabulary races & fun quizzes!</div>
+            </div>
+
+            <div class="card card-worksheets" onclick="openSection('worksheets')">
+                <div class="card-icon">✏️</div>
+                <div class="card-title">Fichas</div>
+                <div class="card-desc">Worksheets, flashcards & fun printable activities!</div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Web Audio Synthesizer for Upbeat Background Music
+        let audioCtx = null;
+        let isPlaying = false;
+        let masterGain = null;
+        let sfxEnabled = true;
+        let currentLevel = 3;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                masterGain = audioCtx.createGain();
+                masterGain.gain.value = 0.25; // Default volume
+                masterGain.connect(audioCtx.destination);
+            }
+        }
+
+        // Active Upbeat Synth Loop
+        let noteIndex = 0;
+        const melody = [261.63, 329.63, 392.00, 523.25, 392.00, 329.63, 293.66, 349.23, 440.00, 349.23];
+        let timerId = null;
+
+        function playUpbeatBeat() {
+            if (!isPlaying || !audioCtx) return;
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(melody[noteIndex % melody.length], audioCtx.currentTime);
+
+            gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.25);
+
+            osc.connect(gain);
+            gain.connect(masterGain);
+
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.25);
+
+            noteIndex++;
+            timerId = setTimeout(playUpbeatBeat, 250);
+        }
+
+        function playSFX(freq) {
+            if (!sfxEnabled) return;
+            initAudio();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+
+            osc.connect(gain);
+            gain.connect(masterGain);
+
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.15);
+        }
+
+        // UI Interactions
+        const modalOverlay = document.getElementById('modalOverlay');
+        const openSettingsBtn = document.getElementById('openSettings');
+        const closeSettingsBtn = document.getElementById('closeSettings');
+        const toggleAudioBtn = document.getElementById('toggleAudioBtn');
+        const volSlider = document.getElementById('volSlider');
+        const volVal = document.getElementById('volVal');
+        const toggleSfxBtn = document.getElementById('toggleSfxBtn');
+
+        openSettingsBtn.addEventListener('click', () => {
+            playSFX(523.25);
+            modalOverlay.classList.add('active');
+        });
+
+        closeSettingsBtn.addEventListener('click', () => {
+            playSFX(392.00);
+            modalOverlay.classList.remove('active');
+        });
+
+        toggleAudioBtn.addEventListener('click', () => {
+            initAudio();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            isPlaying = !isPlaying;
+            if (isPlaying) {
+                toggleAudioBtn.innerHTML = '⏸️ Pause Music';
+                toggleAudioBtn.style.background = '#ff4757';
+                playUpbeatBeat();
+            } else {
+                toggleAudioBtn.innerHTML = '▶️ Play Active Music';
+                toggleAudioBtn.style.background = '#2ed573';
+                clearTimeout(timerId);
+            }
+        });
+
+        volSlider.addEventListener('input', (e) => {
+            const val = e.target.value;
+            volVal.textContent = val + '%';
+            if (masterGain) {
+                masterGain.gain.value = (val / 100) * 0.5;
+            }
+        });
+
+        toggleSfxBtn.addEventListener('click', () => {
+            sfxEnabled = !sfxEnabled;
+            toggleSfxBtn.textContent = sfxEnabled ? '🔊 SFX Sounds: ON' : '🔇 SFX Sounds: OFF';
+            toggleSfxBtn.style.background = sfxEnabled ? '#1e90ff' : '#747d8c';
+        });
+
+        function selectLevel(level, btn) {
+            playSFX(659.25);
+            currentLevel = level;
+            document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        function openSection(section) {
+            playSFX(783.99);
+            alert(`Opening ${section.toUpperCase()} for ${currentLevel}º Primaria!`);
+        }
+    </script>
+</body>
+</html>
