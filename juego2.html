@@ -81,7 +81,7 @@
         <div id="options-container" class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4"></div>
 
         <button id="next-btn" onclick="nextQuestion()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded-2xl shadow-md text-lg hidden bounce-click">
-            Next Animal ➡️
+            Next Sentence ➡️
         </button>
     </div>
 
@@ -92,7 +92,7 @@
             <h2 class="text-2xl font-bold text-emerald-700">Great Job!</h2>
             <p class="text-slate-600">Results Report (Adjectives Challenge)</p>
             <div class="mt-3 inline-block bg-yellow-100 text-yellow-800 font-bold px-4 py-2 rounded-2xl text-lg">
-                Stars: <span id="final-stars">0</span> / 60
+                Stars: <span id="final-stars">0</span> / 120
             </div>
         </div>
 
@@ -115,50 +115,31 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <script>
-        // Preguntas con frases fáciles en inglés y adjetivos: big, short, small, long, tall
+        // Las 12 frases exactas con sus respectivas imágenes (image_0.png a image_5.png)
         const questions = [
-            { 
-                sentenceBefore: "The dolphin is ", 
-                sentenceAfter: ".", 
-                correct: "big", 
-                image: "image_0.png", 
-                options: ["big", "short", "tall"] 
-            },
-            { 
-                sentenceBefore: "The snake is very ", 
-                sentenceAfter: ".", 
-                correct: "long", 
-                image: "image_1.png", 
-                options: ["short", "long", "tall"] 
-            },
-            { 
-                sentenceBefore: "The lizard has ", 
-                sentenceAfter: " legs.", 
-                correct: "short", 
-                image: "image_2.png", 
-                options: ["short", "tall", "big"] 
-            },
-            { 
-                sentenceBefore: "The parrot is ", 
-                sentenceAfter: ".", 
-                correct: "small", 
-                image: "image_3.png", 
-                options: ["tall", "big", "small"] 
-            },
-            { 
-                sentenceBefore: "The butterfly is ", 
-                sentenceAfter: ".", 
-                correct: "small", 
-                image: "image_4.png", 
-                options: ["long", "small", "tall"] 
-            },
-            { 
-                sentenceBefore: "The scorpion has a ", 
-                sentenceAfter: " tail.", 
-                correct: "long", 
-                image: "image_5.png", 
-                options: ["long", "tall", "big"] 
-            }
+            // 1. Dolphin
+            { sentenceBefore: "A dolphin is a ", sentenceAfter: " animal.", correct: "big", image: "image_0.png", options: ["big", "short", "tall"] },
+            { sentenceBefore: "A dolphin does not have a ", sentenceAfter: " body.", correct: "short", image: "image_0.png", options: ["short", "long", "big"] },
+            
+            // 2. Scorpion
+            { sentenceBefore: "A scorpion is a ", sentenceAfter: " animal.", correct: "small", image: "image_5.png", options: ["small", "long", "tall"] },
+            { sentenceBefore: "A scorpion has a ", sentenceAfter: " tail.", correct: "long", image: "image_5.png", options: ["short", "long", "big"] },
+            
+            // 3. Parrot
+            { sentenceBefore: "A parrot is a ", sentenceAfter: " animal.", correct: "small", image: "image_3.png", options: ["big", "small", "tall"] },
+            { sentenceBefore: "A parrot has a ", sentenceAfter: " body.", correct: "short", image: "image_3.png", options: ["long", "short", "big"] },
+            
+            // 4. Lizard
+            { sentenceBefore: "A lizard is a ", sentenceAfter: " animal.", correct: "small", image: "image_2.png", options: ["big", "tall", "small"] },
+            { sentenceBefore: "A lizard has a ", sentenceAfter: " tail.", correct: "long", image: "image_2.png", options: ["short", "long", "small"] },
+            
+            // 5. Snake
+            { sentenceBefore: "A snake is a ", sentenceAfter: " animal.", correct: "long", image: "image_1.png", options: ["short", "long", "small"] },
+            { sentenceBefore: "A snake is not a ", sentenceAfter: " animal.", correct: "tall", image: "image_1.png", options: ["big", "tall", "short"] },
+            
+            // 6. Butterfly
+            { sentenceBefore: "A butterfly is a ", sentenceAfter: " animal.", correct: "small", image: "image_4.png", options: ["big", "small", "long"] },
+            { sentenceBefore: "A butterfly has ", sentenceAfter: " wings.", correct: "big", image: "image_4.png", options: ["short", "big", "tall"] }
         ];
 
         let currentIndex = 0;
