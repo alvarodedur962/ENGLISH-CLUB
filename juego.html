@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adivina el Animal - English Class</title>
+    <!-- Incluimos una fuente de Google Fonts más amigable para niños -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #4A90E2;
+            --secondary-color: #F5A623;
+            --correct-color: #2ECC71;
+            --wrong-color: #EE5253;
+            --bg-color: #F0F4F8;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        #game-container {
+            background-color: rgb(255, 255, 255);
+            width: 90%;
+            max-width: 700px;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        h1 {
+            font-family: 'Fredoka One', cursive;
+            color: var(--primary-color);
+            margin-top: 0;
+            font-size: 2.5em;
+        }
+
+        /* Área de la Pista (Clue Area) */
+        #clue-area {
+            background-color: #EBF8FF;
+            border: 2px dashed #90CDF4;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+        }
+
+        .clue-label {
+            font-weight: 600;
+            color: var(--primary-color);
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        #description {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--text-color);
+            margin-top: 10px;
+        }
+
+        /* Área de la Imagen (Image Area) */
+        #image-area {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            height: 300px;
+            margin: 0 auto 25px auto;
+            border-radius: 15px;
+            overflow: hidden;
+            border: 5px solid white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        #animal-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            /* Aquí está el efecto de desenfoque inicial */
+            filter: blur(25px);
+            transition: filter 0.5s ease;
+        }
+
+        #animal-image.revealed {
+            filter: blur(0px);
+        }
+
+        /* Área de Opciones (Options Area) */
+        #options-area {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .option-btn {
+            background-color: white;
+            border: 2px solid #E2E8F0;
+            color: var(--text-color);
+            padding: 15px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Open Sans', sans-serif;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            border-color: var(--primary-color);
+            background-color: #EBF8FF;
+            transform: translateY(-3px);
+        }
+
+        .option-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .option-btn.correct {
+            background-color: var(--correct-color) !important;
+            color: white !important;
+            border-color: var(--correct-color) !important;
+        }
+
+        .option-btn.wrong {
+            background-color: var(--wrong-color) !important;
+            color: white !important;
+            border-color: var(--wrong-color) !important;
+        }
+
+        #feedback-area {
+            font-size: 1.2em;
+            font-weight: bold;
+            height: 30px;
+            margin-bottom: 20px;
+        }
+
+        /* Botón Siguiente (Next Button) */
+        #next-btn {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #D38C16;
+            transition: all 0.1s ease;
+            font-family: 'Fredoka One', cursive;
+        }
+
+        #next-btn:hover {
+            opacity: 0.9;
+        }
+
+        #next-btn:active {
+            box-shadow: 0 1px 0 #D38C16;
+            transform: translateY(3px);
+        }
+
+        #next-btn.hidden {
+            display: none;
+        }
+
+        /* Pantalla de Resultados (Results Screen) */
+        #final-screen {
+            text-align: center;
+        }
+
+        #final-score-display {
+            font-size: 4em;
+            font-family: 'Fredoka One', cursive;
+            color: var(--secondary-color);
+            margin: 20px 0;
+        }
+
+        #results-table {
+            width: 100%;
+            margin: 30px auto;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        #results-table th, #results-table td {
+            padding: 12px;
+            border-bottom: 1px solid #E2E8F0;
+        }
+
+        #results-table th {
+            color: var(--primary-color);
+        }
+
+        .status-correct { color: var(--correct-color); font-weight: bold; }
+        .status-wrong { color: var(--wrong-color); font-weight: bold; }
+
+        #download-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: 'Open Sans', sans-serif;
+            transition: opacity 0.2s;
+        }
+
+        #download-btn:hover { opacity: 0.9; }
+
+        .hidden { display: none !important; }
+
+        /* Estilos específicos para la impresión (Generación de PDF) */
+        @media print {
+            body { background: white; }
+            #game-container { box-shadow: none; width: 100%; max-width: none; padding: 0; }
+            #download-btn, h1, #game-screen { display: none !important; }
+            #final-screen.hidden { display: block !important; } /* Forzamos mostrar resultados al imprimir */
+            #results-header { display: block !important; }
+            #results-table { border: 1px solid #E2E8F0; }
+        }
+        
+        #results-header { display: none; } /* Oculto en pantalla, solo print */
+
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        
+        <!-- PANTALLA DE JUEGO PRINCIPAL -->
+        <div id="game-screen">
+            <h1>Adivina el Animal</h1>
+            
+            <div id="clue-area">
+                <div class="clue-label">English Description:</div>
+                <div id="description">Cargando...</div>
+            </div>
+
+            <div id="image-area">
+                <img id="animal-image" src="" alt="Blurred Animal">
+            </div>
+
+            <div id="options-area">
+                <!-- Los botones se generarán aquí con JS -->
+            </div>
+
+            <div id="feedback-area"></div>
+
+            <button id="next-btn" class="hidden">Siguiente Animal ➡️</button>
+        </div>
+
+        <!-- PANTALLA FINAL DE RESULTADOS -->
+        <div id="final-screen" class="hidden">
+            <h1>¡Juego Terminado!</h1>
+            
+            <!-- Encabezado visible solo en el PDF -->
+            <div id="results-header" style="text-align:left; margin-bottom: 20px;">
+                <h2>Informe de Resultados</h2>
+                <p><strong>Curso:</strong> English Class - Adjectives: Size & Length</p>
+                <p><strong>Fecha:</strong> <span id="current-date"></span></p>
+            </div>
+
+            <p>Tu puntuación es:</p>
+            <div id="final-score-display">0 / 0</div>
+            
+            <table id="results-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Animal</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody id="results-body">
+                    <!-- Se rellenará con JS -->
+                </tbody>
+            </table>
+
+            <button id="download-btn" onclick="descargarPDF()">📥 Descargar resultados en PDF</button>
+        </div>
+    </div>
+
+    <!-- Incluimos la librería html2pdf.js desde CDN para generar el PDF fácilmente -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <script>
+        // --- DATOS DEL JUEGO (Utilizando las imágenes proporcionadas) ---
+        const gameData = [
+            {
+                description: "It is a BIG, grey animal. It lives in the ocean. It has a LONG body.",
+                correctAnswer: "Dolphin",
+                image: "image_0.png",
+                options: ["Dolphin", "Fish", "Shark", "Lizard"]
+            },
+            {
+                description: "It has a very LONG, thin body. It does not have legs.",
+                correctAnswer: "Snake",
+                image: "image_1.png",
+                options: ["Snake", "Worm", "Spider", "Scorpion"]
+            },
+            {
+                description: "It is a SMALL animal with four TALL legs and a LONG tail. It can be grey or brown.",
+                correctAnswer: "Lizard", // Iguana/Lagarto
+                image: "image_2.png",
+                options: ["Lizard", "Frog", "Parrot", "Snake"]
+            },
+            {
+                description: "It is a beautiful bird. It has TALL legs when it stands. It has colorful feathers.",
+                correctAnswer: "Parrot",
+                image: "image_3.png",
+                options: ["Parrot", "Butterfly", "Dolphin", "Scorpion"]
+            },
+            {
+                description: "It is a very SMALL and light animal. It flies in the sky. It has colorfoul wings.",
+                correctAnswer: "Butterfly",
+                image: "image_4.png",
+                options: ["Butterfly", "Lloro", "Bee", "Lizard"]
+            },
+            {
+                description: "It is a SMALL and dark animal. It lives in the desert. It has a LONG tail with a sting.",
+                correctAnswer: "Scorpion",
+                image: "image_5.png",
+                options: ["Scorpion", "Crab", "Snake", "Spider"]
+            }
+        ];
+
+        // --- VARIABLES DE ESTADO ---
+        let currentIndex = 0;
+        let score = 0;
+        let results = []; // Para guardar el estado final de cada pregunta
+        let canAnswer = true;
+
+        // --- ELEMENTOS DEL DOM ---
+        const gameScreen = document.getElementById('game-screen');
+        const finalScreen = document.getElementById('final-screen');
+        const descElement = document.getElementById('description');
+        const imgElement = document.getElementById('animal-image');
+        const optionsElement = document.getElementById('options-area');
+        const feedbackElement = document.getElementById('feedback-area');
+        const nextBtn = document.getElementById('next-btn');
+        const finalScoreDisplay = document.getElementById('final-score-display');
+        const resultsBody = document.getElementById('results-body');
+
+        // --- LÓGICA DEL JUEGO ---
+
+        function initGame() {
+            currentIndex = 0;
+            score = 0;
+            results = [];
+            showQuestion();
+        }
+
+        function showQuestion() {
+            // Limpiar estado
+            canAnswer = true;
+            feedbackElement.innerText = "";
+            nextBtn.classList.add('hidden');
+            imgElement.classList.remove('revealed'); // Volver a desenfocar
+
+            const currentData = gameData[currentIndex];
+
+            // Rellenar pista e imagen
+            descElement.innerText = currentData.description;
+            imgElement.src = currentData.image;
+
+            // Generar botones de opción
+            optionsElement.innerHTML = "";
+            currentData.options.forEach(option => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = option;
+                btn.onclick = () => checkAnswer(btn, option);
+                optionsElement.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selectedBtn, selectedOption) {
+            if (!canAnswer) return; // Evitar múltiples clics
+            canAnswer = false;
+
+            const correct = gameData[currentIndex].correctAnswer;
+            const isCorrect = (selectedOption === correct);
+
+            // Guardar resultado para el informe
+            results.push({
+                index: currentIndex + 1,
+                animal: correct,
+                status: isCorrect
+            });
+
+            // Revelar la imagen
+            imgElement.classList.add('revealed');
+
+            // Feedback visual en botones
+            if (isCorrect) {
+                score++;
+                selectedBtn.classList.add('correct');
+                feedbackElement.innerText = "✨ ¡Correct! Well done.";
+                feedbackElement.style.color = "var(--correct-color)";
+            } else {
+                selectedBtn.classList.add('wrong');
+                feedbackElement.innerText = `❌ No. The correct animal is: ${correct}`;
+                feedbackElement.style.color = "var(--wrong-color)";
+                // Resaltar la respuesta correcta
+                Array.from(optionsElement.children).forEach(btn => {
+                    if (btn.innerText === correct) {
+                        btn.classList.add('correct');
+                    }
+                });
+            }
+
+            // Mostrar botón siguiente o finalizar
+            if (currentIndex < gameData.length - 1) {
+                nextBtn.innerText = "Siguiente Animal ➡️";
+            } else {
+                nextBtn.innerText = "Ver Resultados 📊";
+            }
+            nextBtn.classList.remove('hidden');
+        }
+
+        nextBtn.onclick = () => {
+            currentIndex++;
+            if (currentIndex < gameData.length) {
+                showQuestion();
+            } else {
+                showFinalScreen();
+            }
+        };
+
+        function showFinalScreen() {
+            gameScreen.classList.add('hidden');
+            finalScreen.classList.remove('hidden');
+
+            // Mostrar puntuación final
+            finalScoreDisplay.innerText = `${score} / ${gameData.length}`;
+
+            // Rellenar la tabla de resultados
+            resultsBody.innerHTML = "";
+            results.forEach(res => {
+                const row = document.createElement('tr');
+                const statusText = res.status ? "✅ Correct" : "❌ Wrong";
+                const statusClass = res.status ? "status-correct" : "status-wrong";
+                
+                row.innerHTML = `
+                    <td>${res.index}</td>
+                    <td>${res.animal}</td>
+                    <td class="${statusClass}">${statusText}</td>
+                `;
+                resultsBody.appendChild(row);
+            });
+
+            // Poner la fecha actual para el reporte PDF
+            document.getElementById('current-date').innerText = new Date().toLocaleDateString('es-ES');
+        }
+
+        // --- GENERACIÓN DE PDF ---
+        function descargarPDF() {
+            const downloadBtn = document.getElementById('download-btn');
+            // Ocultamos el botón temporalmente para que no salga en el PDF
+            downloadBtn.innerText = "Generando PDF... por favor espere";
+            downloadBtn.disabled = true;
+
+            const element = document.getElementById('final-screen');
+            
+            // Configuración del PDF
+            const opt = {
+                margin:       10,
+                filename:     'English_Animal_Guess_Results.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            // Generar el PDF utilizando la librería
+            html2pdf().set(opt).from(element).save().then(() => {
+                // Restauramos el botón después de generar
+                downloadBtn.innerText = "📥 Descargar resultados en PDF";
+                downloadBtn.disabled = false;
+            });
+        }
+
+        // Iniciar el juego
+        initGame();
+
+    </script>
+</body>
+</html>
