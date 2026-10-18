@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Realistic Adjectives Challenge - English Kids Hub</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Fredoka', 'Quicksand', sans-serif;
+            background: linear-gradient(135deg, #a8ff78 0%, #78ffd6 100%);
+            min-height: 100vh;
+            user-select: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            border: 4px solid #ffffff;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .bounce-click:active {
+            transform: scale(0.97);
+        }
+
+        .animal-img {
+            filter: blur(25px);
+            transition: filter 0.5s ease;
+        }
+        .animal-img.revealed {
+            filter: blur(0px);
+        }
+
+        @media print {
+            body { background: white !important; }
+            .no-print { display: none !important; }
+            .print-card { box-shadow: none !important; border: none !important; width: 100% !important; }
+        }
+    </style>
+</head>
+<body class="text-slate-800" onclick="userGestureAudio()">
+
+    <!-- BARRA SUPERIOR CON CONTROL DE MÚSICA SINCRONIZADA -->
+    <header class="w-full max-w-xl bg-white/90 backdrop-blur-md border-b-4 border-yellow-400 rounded-2xl px-4 py-3 shadow-md mb-4 flex justify-between items-center no-print">
+        <a href="index.html" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-4 py-2 rounded-xl text-sm transition-all flex items-center gap-2" onclick="event.stopPropagation()">
+            🏠 Menú Principal
+        </a>
+
+        <div class="flex items-center gap-3">
+            <button id="bgm-btn" onclick="event.stopPropagation(); toggleGameBGM();" class="bg-pink-500 hover:bg-pink-600 text-white px-3 py-1.5 rounded-xl text-xs font-bold shadow">
+                🎵 Music: OFF
+            </button>
+            <div class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-xl font-bold text-sm">
+                ⭐ <span id="score">0</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- CONTENEDOR PRINCIPAL DEL JUEGO -->
+    <div id="game-card-container" class="glass-card rounded-3xl p-6 w-full max-w-xl shadow-xl print-card">
+        
+        <div class="bg-emerald-50 border-2 border-dashed border-emerald-300 rounded-2xl p-4 mb-4 text-center">
+            <h2 class="text-emerald-700 font-bold text-lg mb-1">Realistic Adjectives Challenge! 🧠✨</h2>
+            <p id="clue" class="text-emerald-900 font-bold text-base">Cargando descripción...</p>
+        </div>
+
+        <div class="w-full h-64 rounded-2xl overflow-hidden relative mb-4 bg-slate-200 shadow-inner">
+            <img id="animal-photo" class="animal-img w-full h-full object-cover transform scale-110" src="" alt="Animal">
+        </div>
+
+        <!-- 3 OPCIONES REALISTAS -->
+        <div id="options-container" class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4"></div>
+
+        <button id="next-btn" onclick="nextQuestion()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-2xl shadow-md text-lg hidden bounce-click">
+            Siguiente Animal ➡️
+        </button>
+    </div>
+
+    <!-- PANTALLA DE RESULTADOS / REVISIÓN PARA EL PROFESOR -->
+    <section id="results-view" class="hidden glass-card rounded-3xl p-8 w-full max-w-xl shadow-xl border-4 border-emerald-300 print-card">
+        <div class="text-center mb-6">
+            <div class="text-5xl mb-2">🎉</div>
+            <h2 class="text-2xl font-bold text-emerald-700">¡Reto Realista Completado!</h2>
+            <p class="text-slate-600">Informe de resultados (Adjetivos Reales)</p>
+            <div class="mt-3 inline-block bg-yellow-100 text-yellow-800 font-bold px-4 py-2 rounded-2xl text-lg">
+                Estrellas conseguidas: <span id="final-stars">0</span> / 60
+            </div>
+        </div>
+
+        <div class="mb-6">
+            <h3 class="font-bold text-slate-700 mb-3">Detalle de respuestas del alumno:</h3>
+            <div id="results-list" class="space-y-3"></div>
+        </div>
+
+        <div class="flex gap-3 no-print">
+            <button onclick="downloadPDF()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-2xl shadow-md transition-all flex items-center justify-center gap-2">
+                <span>📥 Descargar / Imprimir Informe (PDF)</span>
+            </button>
+            <a href="index.html" class="bg-slate-300 hover:bg-slate-400 text-slate-700 font-bold py-3 px-4 rounded-2xl shadow-md text-center flex items-center justify-center">
+                🏠 Salir
+            </a>
+        </div>
+    </section>
+
+    <!-- LIBRERÍA PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <script>
+        // Preguntas con descripciones realistas utilizando exclusively big, small, long, short, tall y los 6 animales
+        const questions = [
+            { 
+                clue: 'I am a BIG animal with a LONG body. I live in the big ocean!', 
+                correct: 'Dolphin', 
+                image: 'image_0.png', 
+                options: ['Dolphin', 'Lizard', 'Scorpion'] 
+            },
+            { 
+                clue: 'I am a LONG animal. I have NO legs at all, just a long body!', 
+                correct: 'Snake', 
+                image: 'image_1.png', 
+                options: ['Snake', 'Parrot', 'Butterfly'] 
+            },
+            { 
+                clue: 'I am a SMALL animal. I have SHORT legs and a LONG tail.', 
+                correct: 'Lizard', 
+                image: 'image_2.png', 
+                options: ['Lizard', 'Dolphin', 'Snake'] 
+            },
+            { 
+                clue: 'I am a SMALL bird. I have a SHORT body and very short legs.', 
+                correct: 'Parrot', 
+                image: 'image_3.png', 
+                options: ['Parrot', 'Butterfly', 'Scorpion'] 
+            },
+            { 
+                clue: 'I am a very SMALL insect. I have a SHORT body and small wings.', 
+                correct: 'Butterfly', 
+                image: 'image_4.png', 
+                options: ['Butterfly', 'Lizard', 'Parrot'] 
+            },
+            { 
+                clue: 'I am a SMALL animal. I have a short body and a LONG tail with a sting.', 
+                correct: 'Scorpion', 
+                image: 'image_5.png', 
+                options: ['Scorpion', 'Snake', 'Dolphin'] 
+            }
+        ];
+
+        let currentIndex = 0;
+        let score = 0;
+        let userAnswers = [];
+
+        // Sistema de Audio Sincronizado
+        let audioCtx = null;
+        let isBgmPlaying = false;
+        let bgmInterval = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function userGestureAudio() {
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        const bgmNotes = [261.63, 329.63, 392.00, 329.63, 349.23, 440.00, 392.00, 329.63];
+        let noteIdx = 0;
+
+        function playBgmStep() {
+            if (!isBgmPlaying || !audioCtx) return;
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(bgmNotes[noteIdx], now);
+            gain.gain.setValueAtTime(0.05, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + 0.25);
+            noteIdx = (noteIdx + 1) % bgmNotes.length;
+        }
+
+        function toggleGameBGM() {
+            initAudio();
+            isBgmPlaying = !isBgmPlaying;
+            localStorage.setItem('bgmPlaying', isBgmPlaying);
+            updateBgmButton();
+        }
+
+        function updateBgmButton() {
+            const btn = document.getElementById('bgm-btn');
+            if (isBgmPlaying) {
+                btn.innerText = "🎵 Music: ON";
+                btn.classList.replace('bg-pink-500', 'bg-emerald-500');
+                if (!bgmInterval) bgmInterval = setInterval(playBgmStep, 250);
+            } else {
+                btn.innerText = "🎵 Music: OFF";
+                btn.classList.replace('bg-emerald-500', 'bg-pink-500');
+                clearInterval(bgmInterval);
+                bgmInterval = null;
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initAudio();
+            if (localStorage.getItem('bgmPlaying') === 'true') {
+                isBgmPlaying = true;
+                updateBgmButton();
+            }
+            loadQuestion();
+        });
+
+        function playSound(type) {
+            initAudio();
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'correct') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, now);
+                osc.frequency.exponentialRampToValueAtTime(880, now + 0.3);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            } else if (type === 'wrong') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, now);
+                osc.frequency.linearRampToValueAtTime(110, now + 0.25);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                osc.start(now);
+                osc.stop(now + 0.25);
+            }
+        }
+
+        function loadQuestion() {
+            const q = questions[currentIndex];
+            document.getElementById('clue').innerText = `"${q.clue}"`;
+            
+            const img = document.getElementById('animal-photo');
+            img.classList.remove('revealed');
+            img.src = q.image;
+
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+            document.getElementById('next-btn').style.display = 'none';
+
+            q.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'bg-slate-100 hover:bg-emerald-100 border-2 border-slate-300 font-bold p-3 rounded-2xl text-slate-700 transition-all text-lg';
+                btn.innerText = opt;
+                btn.onclick = (e) => { e.stopPropagation(); checkAnswer(opt, btn); };
+                container.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selected, btn) {
+            const q = questions[currentIndex];
+            const allBtns = document.querySelectorAll('#options-container button');
+            allBtns.forEach(b => b.disabled = true);
+
+            const isCorrect = (selected === q.correct);
+            userAnswers.push({
+                question: q.clue,
+                selected: selected,
+                correct: q.correct,
+                isCorrect: isCorrect
+            });
+
+            document.getElementById('animal-photo').classList.add('revealed');
+
+            if (isCorrect) {
+                btn.classList.add('bg-emerald-100', 'border-emerald-500', 'text-emerald-800');
+                score += 10;
+                document.getElementById('score').innerText = score;
+                playSound('correct');
+            } else {
+                btn.classList.add('bg-rose-100', 'border-rose-500', 'text-rose-800');
+                playSound('wrong');
+                allBtns.forEach(b => {
+                    if (b.innerText === q.correct) {
+                        b.classList.add('bg-emerald-100', 'border-emerald-500', 'text-emerald-800');
+                    }
+                });
+            }
+
+            document.getElementById('next-btn').style.display = 'block';
+        }
+
+        function nextQuestion() {
+            currentIndex++;
+            if (currentIndex < questions.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('game-card-container').classList.add('hidden');
+            document.getElementById('results-view').classList.remove('hidden');
+            document.getElementById('final-stars').innerText = score;
+
+            const listContainer = document.getElementById('results-list');
+            listContainer.innerHTML = '';
+
+            userAnswers.forEach((ans, idx) => {
+                const item = document.createElement('div');
+                item.className = `p-3 rounded-2xl border-2 ${ans.isCorrect ? 'bg-emerald-50 border-emerald-200' : 'bg-rose-50 border-rose-200'} flex justify-between items-center`;
+                item.innerHTML = `
+                    <div>
+                        <span class="font-bold text-xs text-slate-500">Pregunta ${idx + 1}</span>
+                        <p class="text-sm font-bold text-slate-700">${ans.question}</p>
+                        <p class="text-xs text-slate-600 mt-1">Respuesta: <span class="font-bold ${ans.isCorrect ? 'text-emerald-600' : 'text-rose-600'}">${ans.selected}</span> ${!ans.isCorrect ? `(Correcta: <b>${ans.correct}</b>)` : ''}</p>
+                    </div>
+                    <div class="text-2xl">${ans.isCorrect ? '✅' : '❌'}</div>
+                `;
+                listContainer.appendChild(item);
+            });
+        }
+
+        function downloadPDF() {
+            const element = document.getElementById('results-view');
+            const opt = {
+                margin: 10,
+                filename: 'Informe_Resultados_Realistas.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save();
+        }
+    </script>
+</body>
+</html>
